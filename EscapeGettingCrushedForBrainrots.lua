@@ -1,15 +1,14 @@
 --[[ 
-    SAIRO KEY SYSTEM [ULTIMATE]
-    Professional UI with Sidebar, History, Notification System, and Session Management
+    SAIRO KEY SYSTEM [PREMIUM]
+    Updated with Orange/Red Theme, Smooth Animations & CanvasGroup Logic
 ]]
 
 local KeySystem = Instance.new("ScreenGui")
-local MainFrame = Instance.new("Frame")
+local MainCanvas = Instance.new("CanvasGroup") -- Using CanvasGroup for smooth fade out
 local Sidebar = Instance.new("Frame")
 local ContentArea = Instance.new("Frame")
 local Title = Instance.new("TextLabel")
 local Glow = Instance.new("ImageLabel")
-local Stroke = Instance.new("UIStroke")
 
 -- Sidebar Buttons
 local TabHome = Instance.new("TextButton")
@@ -34,14 +33,16 @@ local TweenService = game:GetService("TweenService")
 local HttpService = game:GetService("HttpService")
 local UserInputService = game:GetService("UserInputService")
 local HWID = game:GetService("RbxAnalyticsService"):GetClientId()
-local RunService = game:GetService("RunService")
 
 -- Config
 local API_URL = "https://webservice-g7b9.onrender.com" 
-local SCRIPT_URL = "https://raw.githubusercontent.com/gumanba/Scripts/main/EscapeGettingCrushedForBrainrots" -- THIS IS THE TEMPLATE VARIABLE FOR THE BOT
-local COLOR_ACCENT = Color3.fromRGB(99, 102, 241) -- Indigo 500
-local COLOR_BG = Color3.fromRGB(15, 15, 20) 
-local COLOR_SIDE = Color3.fromRGB(25, 25, 30)
+local SCRIPT_URL = "https://raw.githubusercontent.com/gumanba/Scripts/main/EscapeGettingCrushedForBrainrots" -- TEMPLATE VARIABLE
+-- THEME: PREMIUM ORANGE-RED
+local COLOR_ACCENT = Color3.fromRGB(249, 115, 22) -- Orange 500
+local COLOR_ACCENT_HOVER = Color3.fromRGB(251, 146, 60) -- Orange 400
+local COLOR_BG = Color3.fromRGB(10, 10, 10) -- Zinc 950
+local COLOR_SIDE = Color3.fromRGB(18, 18, 18) -- Zinc 900
+local COLOR_STROKE = Color3.fromRGB(40, 40, 40)
 
 -- --- HELPER FUNCTIONS ---
 
@@ -70,19 +71,35 @@ local function createGradient(obj, c1, c2)
     grad.Parent = obj
 end
 
+local function animateButton(btn)
+    btn.AutoButtonColor = false
+    btn.MouseEnter:Connect(function()
+        TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = COLOR_ACCENT_HOVER}):Play()
+    end)
+    btn.MouseLeave:Connect(function()
+        TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = COLOR_ACCENT}):Play()
+    end)
+    btn.MouseButton1Down:Connect(function()
+        TweenService:Create(btn, TweenInfo.new(0.1), {Size = UDim2.new(btn.Size.X.Scale, -2, btn.Size.Y.Scale, -2)}):Play()
+    end)
+    btn.MouseButton1Up:Connect(function()
+        TweenService:Create(btn, TweenInfo.new(0.1), {Size = UDim2.new(btn.Size.X.Scale, 2, btn.Size.Y.Scale, 2)}):Play()
+    end)
+end
+
 -- --- NOTIFICATION SYSTEM ---
 
 local function Notify(title, text, duration)
     local frame = Instance.new("Frame")
     frame.Name = "Notif"
     frame.Parent = NotifContainer
-    frame.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+    frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
     frame.BorderSizePixel = 0
     frame.Size = UDim2.new(1, 0, 0, 50)
-    frame.BackgroundTransparency = 1 -- Start transparent
+    frame.BackgroundTransparency = 1 
     round(frame, 6)
     
-    local stroke = addStroke(frame, Color3.fromRGB(60, 60, 70), 1)
+    local stroke = addStroke(frame, COLOR_STROKE, 1)
     
     local tLabel = Instance.new("TextLabel")
     tLabel.Parent = frame
@@ -125,34 +142,36 @@ end
 
 -- --- UI CONSTRUCTION ---
 
-KeySystem.Name = "Sairo"
+KeySystem.Name = "SairoPremium"
 KeySystem.Parent = game.CoreGui
 KeySystem.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
-MainFrame.Name = "Main"
-MainFrame.Parent = KeySystem
-MainFrame.BackgroundColor3 = COLOR_BG
-MainFrame.Position = UDim2.new(0.5, -225, 0.5, -130)
-MainFrame.Size = UDim2.new(0, 450, 0, 260)
-MainFrame.BorderSizePixel = 0
-round(MainFrame, 10)
-addStroke(MainFrame, Color3.fromRGB(40, 40, 45), 1)
+-- Main Canvas (CanvasGroup allows GroupTransparency for smooth fade out)
+MainCanvas.Name = "Main"
+MainCanvas.Parent = KeySystem
+MainCanvas.BackgroundColor3 = COLOR_BG
+MainCanvas.Position = UDim2.new(0.5, -225, 0.5, -130)
+MainCanvas.Size = UDim2.new(0, 450, 0, 260)
+MainCanvas.BorderSizePixel = 0
+MainCanvas.GroupTransparency = 0
+round(MainCanvas, 12)
+addStroke(MainCanvas, Color3.fromRGB(60, 60, 60), 1)
 
 -- Glow Effect
 Glow.Name = "Glow"
-Glow.Parent = MainFrame
+Glow.Parent = MainCanvas
 Glow.BackgroundTransparency = 1
-Glow.Position = UDim2.new(0, -50, 0, -50)
-Glow.Size = UDim2.new(1, 100, 1, 100)
+Glow.Position = UDim2.new(0, -100, 0, -100)
+Glow.Size = UDim2.new(1, 200, 1, 200)
 Glow.Image = "rbxassetid://5028857472"
 Glow.ImageColor3 = COLOR_ACCENT
-Glow.ImageTransparency = 0.85
-Glow.ZIndex = -1
+Glow.ImageTransparency = 0.92
+Glow.ZIndex = 0
 
 -- Notification Container Setup
 NotifContainer.Name = "Notifications"
 NotifContainer.Parent = KeySystem
-NotifContainer.Position = UDim2.new(1, -220, 1, -300) -- Bottom Right
+NotifContainer.Position = UDim2.new(1, -220, 1, -300) 
 NotifContainer.Size = UDim2.new(0, 200, 0, 280)
 NotifContainer.BackgroundTransparency = 1
 
@@ -163,19 +182,11 @@ UIListLayout_Notif.Padding = UDim.new(0, 5)
 
 -- Sidebar Setup
 Sidebar.Name = "Side"
-Sidebar.Parent = MainFrame
+Sidebar.Parent = MainCanvas
 Sidebar.BackgroundColor3 = COLOR_SIDE
-Sidebar.Size = UDim2.new(0, 120, 1, 0)
-round(Sidebar, 10)
-
--- Sidebar Cover for seamless look
-local SidebarCover = Instance.new("Frame")
-SidebarCover.BackgroundColor3 = COLOR_SIDE
-SidebarCover.BorderSizePixel = 0
-SidebarCover.Position = UDim2.new(1, -15, 0, 0)
-SidebarCover.Size = UDim2.new(0, 15, 1, 0)
-SidebarCover.Parent = Sidebar
-SidebarCover.ZIndex = 1
+Sidebar.Size = UDim2.new(0, 130, 1, 0)
+Sidebar.ZIndex = 2
+-- No round on sidebar, MainCanvas handles clipping
 
 Title.Parent = Sidebar
 Title.BackgroundTransparency = 1
@@ -184,7 +195,7 @@ Title.Size = UDim2.new(1, 0, 0, 30)
 Title.Font = Enum.Font.GothamBlack
 Title.Text = "SAIRO"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.TextSize = 20
+Title.TextSize = 22
 Title.ZIndex = 2
 createGradient(Title, Color3.fromRGB(255, 255, 255), COLOR_ACCENT)
 
@@ -196,23 +207,37 @@ local function createTabBtn(name, yPos)
     btn.Position = UDim2.new(0, 10, 0, yPos)
     btn.Size = UDim2.new(1, -20, 0, 35)
     btn.Font = Enum.Font.GothamMedium
-    btn.Text = "   " .. name
-    btn.TextColor3 = Color3.fromRGB(120, 120, 130)
+    btn.Text = "  " .. name
+    btn.TextColor3 = Color3.fromRGB(150, 150, 150)
     btn.TextSize = 13
     btn.TextXAlignment = Enum.TextXAlignment.Left
     btn.ZIndex = 2
     round(btn, 6)
+    
+    -- Hover effect for tabs
+    btn.MouseEnter:Connect(function()
+        if btn.BackgroundTransparency == 1 then
+             TweenService:Create(btn, TweenInfo.new(0.2), {TextColor3 = Color3.new(1,1,1)}):Play()
+        end
+    end)
+    btn.MouseLeave:Connect(function()
+        if btn.BackgroundTransparency == 1 then
+             TweenService:Create(btn, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(150,150,150)}):Play()
+        end
+    end)
+    
     return btn
 end
 
-TabHome = createTabBtn("Home", 90)
+TabHome = createTabBtn("Gateway", 90)
 TabHistory = createTabBtn("History", 135)
 
 -- Content Area
-ContentArea.Parent = MainFrame
+ContentArea.Parent = MainCanvas
 ContentArea.BackgroundTransparency = 1
-ContentArea.Position = UDim2.new(0, 120, 0, 0)
-ContentArea.Size = UDim2.new(1, -120, 1, 0)
+ContentArea.Position = UDim2.new(0, 130, 0, 0)
+ContentArea.Size = UDim2.new(1, -130, 1, 0)
+ContentArea.ZIndex = 2
 
 -- Pages
 HomePage.Parent = ContentArea
@@ -232,7 +257,7 @@ InfoTitle.BackgroundTransparency = 1
 InfoTitle.Position = UDim2.new(0, 30, 0, 25)
 InfoTitle.Size = UDim2.new(1, -60, 0, 20)
 InfoTitle.Font = Enum.Font.GothamBold
-InfoTitle.Text = "AUTHENTICATION"
+InfoTitle.Text = "ACCESS CONTROL"
 InfoTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
 InfoTitle.TextSize = 16
 InfoTitle.TextXAlignment = Enum.TextXAlignment.Left
@@ -243,53 +268,60 @@ InfoDesc.BackgroundTransparency = 1
 InfoDesc.Position = UDim2.new(0, 30, 0, 45)
 InfoDesc.Size = UDim2.new(1, -60, 0, 30)
 InfoDesc.Font = Enum.Font.Gotham
-InfoDesc.Text = "Complete the verification process to access the script."
-InfoDesc.TextColor3 = Color3.fromRGB(120, 120, 130)
+InfoDesc.Text = "Valid key required to initialize script execution."
+InfoDesc.TextColor3 = Color3.fromRGB(100, 100, 100)
 InfoDesc.TextSize = 11
 InfoDesc.TextWrapped = true
 InfoDesc.TextXAlignment = Enum.TextXAlignment.Left
 
 KeyBox.Parent = HomePage
-KeyBox.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+KeyBox.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 KeyBox.Position = UDim2.new(0, 30, 0, 90)
 KeyBox.Size = UDim2.new(1, -60, 0, 45)
 KeyBox.Font = Enum.Font.Code
-KeyBox.PlaceholderText = "Paste Key Here..."
-KeyBox.PlaceholderColor3 = Color3.fromRGB(80, 80, 90)
+KeyBox.PlaceholderText = "Enter License Key..."
+KeyBox.PlaceholderColor3 = Color3.fromRGB(60, 60, 60)
 KeyBox.Text = ""
-KeyBox.TextColor3 = Color3.fromRGB(220, 220, 220)
+KeyBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 KeyBox.TextSize = 13
 round(KeyBox, 8)
-addStroke(KeyBox, Color3.fromRGB(50, 50, 55), 1)
+addStroke(KeyBox, COLOR_STROKE, 1)
 
+-- Verify Button
 VerifyBtn.Parent = HomePage
 VerifyBtn.BackgroundColor3 = COLOR_ACCENT
 VerifyBtn.Position = UDim2.new(0, 30, 0, 150)
 VerifyBtn.Size = UDim2.new(0.45, 0, 0, 40)
 VerifyBtn.Font = Enum.Font.GothamBold
-VerifyBtn.Text = "VERIFY KEY"
+VerifyBtn.Text = "AUTHENTICATE"
 VerifyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-VerifyBtn.TextSize = 12
+VerifyBtn.TextSize = 11
 round(VerifyBtn, 8)
+animateButton(VerifyBtn)
 
+-- Get Key Button
 GetKeyBtn.Parent = HomePage
-GetKeyBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+GetKeyBtn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 GetKeyBtn.Position = UDim2.new(0.52, 0, 0, 150)
 GetKeyBtn.Size = UDim2.new(0.40, 0, 0, 40)
 GetKeyBtn.Font = Enum.Font.GothamBold
 GetKeyBtn.Text = "GET KEY"
 GetKeyBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
-GetKeyBtn.TextSize = 12
+GetKeyBtn.TextSize = 11
 round(GetKeyBtn, 8)
-addStroke(GetKeyBtn, Color3.fromRGB(50, 50, 55), 1)
+addStroke(GetKeyBtn, COLOR_STROKE, 1)
+-- Simple hover for Get Key
+GetKeyBtn.MouseEnter:Connect(function() TweenService:Create(GetKeyBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(35,35,35)}):Play() end)
+GetKeyBtn.MouseLeave:Connect(function() TweenService:Create(GetKeyBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(25,25,25)}):Play() end)
+
 
 Status.Parent = HomePage
 Status.BackgroundTransparency = 1
 Status.Position = UDim2.new(0, 30, 1, -30)
 Status.Size = UDim2.new(1, -60, 0, 20)
 Status.Font = Enum.Font.GothamBold
-Status.Text = "WAITING FOR INPUT"
-Status.TextColor3 = Color3.fromRGB(80, 80, 90)
+Status.Text = "SYSTEM READY"
+Status.TextColor3 = Color3.fromRGB(60, 60, 60)
 Status.TextSize = 10
 Status.TextXAlignment = Enum.TextXAlignment.Left
 
@@ -308,7 +340,7 @@ HistoryTitle.BackgroundTransparency = 1
 HistoryTitle.Position = UDim2.new(0, 25, 0, 20)
 HistoryTitle.Size = UDim2.new(1, 0, 0, 30)
 HistoryTitle.Font = Enum.Font.GothamBold
-HistoryTitle.Text = "SAVED KEYS"
+HistoryTitle.Text = "RECENT KEYS"
 HistoryTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
 HistoryTitle.TextSize = 14
 HistoryTitle.TextXAlignment = Enum.TextXAlignment.Left
@@ -324,15 +356,15 @@ local function switchTab(page)
     HistoryPage.Visible = false
     page.Visible = true
     
-    TabHome.TextColor3 = Color3.fromRGB(120, 120, 130)
-    TabHistory.TextColor3 = Color3.fromRGB(120, 120, 130)
+    TabHome.TextColor3 = Color3.fromRGB(150, 150, 150)
+    TabHistory.TextColor3 = Color3.fromRGB(150, 150, 150)
     TabHome.BackgroundTransparency = 1
     TabHistory.BackgroundTransparency = 1
     
     local activeBtn = (page == HomePage) and TabHome or TabHistory
     activeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    -- Slight background for active tab
-    activeBtn.BackgroundTransparency = 0.95
+    -- Accent Indicator
+    TweenService:Create(activeBtn, TweenInfo.new(0.3), {BackgroundTransparency = 0.95}):Play()
 end
 
 local function setStatus(text, color)
@@ -342,8 +374,6 @@ end
 
 local function getKey()
     setStatus("CONTACTING SERVER...", Color3.fromRGB(255, 255, 255))
-    VerifyBtn.AutoButtonColor = false
-    GetKeyBtn.AutoButtonColor = false
     
     local url = API_URL .. "/api/init"
     local body = HttpService:JSONEncode({hwid = HWID})
@@ -365,18 +395,15 @@ local function getKey()
         if data.url then
             setclipboard(data.url)
             setStatus("LINK COPIED TO CLIPBOARD", Color3.fromRGB(74, 222, 128))
-            Notify("Success", "Key generation link copied to clipboard.", 4)
+            Notify("Link Generated", "Copied to clipboard.", 4)
         else
             setStatus("SERVER ERROR", Color3.fromRGB(248, 113, 113))
-            Notify("Error", "Server returned invalid data.", 4)
+            Notify("Error", "Invalid server response.", 4)
         end
     else
         setStatus("CONNECTION FAILED", Color3.fromRGB(248, 113, 113))
-        Notify("Error", "Could not connect to Sairo servers.", 4)
+        Notify("Network Error", "Check your connection.", 4)
     end
-    
-    VerifyBtn.AutoButtonColor = true
-    GetKeyBtn.AutoButtonColor = true
 end
 
 local function loadHistory()
@@ -389,10 +416,10 @@ local function loadHistory()
          
          local card = Instance.new("Frame")
          card.Parent = HistoryScroll
-         card.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
-         card.Size = UDim2.new(1, 0, 0, 50)
+         card.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+         card.Size = UDim2.new(1, 0, 0, 45)
          round(card, 8)
-         addStroke(card, Color3.fromRGB(50, 50, 55), 1)
+         addStroke(card, Color3.fromRGB(40, 40, 40), 1)
          
          local kLabel = Instance.new("TextLabel")
          kLabel.Parent = card
@@ -405,7 +432,6 @@ local function loadHistory()
          kLabel.TextSize = 12
          kLabel.TextXAlignment = Enum.TextXAlignment.Left
          
-         -- Copy Button logic inside history
          local copyBtn = Instance.new("TextButton")
          copyBtn.Parent = card
          copyBtn.Size = UDim2.new(1,0,1,0)
@@ -413,19 +439,30 @@ local function loadHistory()
          copyBtn.Text = ""
          copyBtn.MouseButton1Click:Connect(function()
              setclipboard(lastKey)
-             Notify("Copied", "Key copied from history.", 2)
+             Notify("History", "Key copied.", 2)
          end)
     end
 end
 
+local function closeUI()
+    -- Smooth "Pop Out" Animation using CanvasGroup Transparency and Scaling
+    -- 1. Tween Transparency
+    TweenService:Create(MainCanvas, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {GroupTransparency = 1}):Play()
+    -- 2. Scale Down slightly (pop effect)
+    TweenService:Create(MainCanvas, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 0)}):Play()
+    
+    task.wait(0.5)
+    KeySystem:Destroy()
+end
+
 local function verify(inputKey)
     if inputKey == "" then 
-        Notify("Input Required", "Please paste your key into the box.", 3)
+        Notify("Input Required", "Paste key to continue.", 3)
         return 
     end
     
-    setStatus("VERIFYING KEY...", Color3.fromRGB(255, 255, 255))
-    VerifyBtn.Text = "CHECKING..."
+    setStatus("AUTHENTICATING...", Color3.fromRGB(255, 255, 255))
+    VerifyBtn.Text = "..."
     
     local url = API_URL .. "/api/verify-key?key=" .. inputKey .. "&hwid=" .. HWID
     local success, response = pcall(function() return game:HttpGet(url) end)
@@ -433,30 +470,26 @@ local function verify(inputKey)
     if success then
         local data = HttpService:JSONDecode(response)
         if data.status == "valid" then
-            setStatus("ACCESS GRANTED", Color3.fromRGB(74, 222, 128))
-            Notify("Success", "Key verified! Loading script...", 5)
+            setStatus("GRANTED", Color3.fromRGB(74, 222, 128))
+            Notify("Authenticated", "Loading script...", 5)
             
             if writefile then writefile("Sairo_Last.txt", inputKey) end
             
-            -- Close UI Animation
-            MainFrame:TweenSize(UDim2.new(0, 0, 0, 0), "Out", "Quad", 0.5, true)
-            wait(0.6)
-            KeySystem:Destroy()
+            closeUI()
             
-            -- Execute Script
             loadstring(game:HttpGet(SCRIPT_URL, true))()
         elseif data.status == "invalid_hwid" then
              setStatus("HWID MISMATCH", Color3.fromRGB(248, 113, 113))
-             Notify("Error", "This key is linked to another device.", 5)
+             Notify("Error", "Key invalid for this device.", 5)
         else
             setStatus("INVALID KEY", Color3.fromRGB(248, 113, 113))
-            Notify("Error", "Key is invalid or expired.", 4)
+            Notify("Error", "Key invalid or expired.", 4)
         end
     else
         setStatus("CONNECTION FAILED", Color3.fromRGB(248, 113, 113))
-        Notify("Error", "Network error during verification.", 4)
+        Notify("Error", "Server unreachable.", 4)
     end
-    VerifyBtn.Text = "VERIFY KEY"
+    VerifyBtn.Text = "AUTHENTICATE"
 end
 
 -- --- EVENTS & INIT ---
@@ -474,17 +507,17 @@ end)
 local dragging, dragInput, dragStart, startPos
 local function update(input)
     local delta = input.Position - dragStart
-    MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    MainCanvas.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
 end
-MainFrame.InputBegan:Connect(function(input)
+MainCanvas.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
         dragging = true
         dragStart = input.Position
-        startPos = MainFrame.Position
+        startPos = MainCanvas.Position
         input.Changed:Connect(function() if input.UserInputState == Enum.UserInputState.End then dragging = false end end)
     end
 end)
-MainFrame.InputChanged:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseMovement then dragInput = input end end)
+MainCanvas.InputChanged:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseMovement then dragInput = input end end)
 UserInputService.InputChanged:Connect(function(input) if input == dragInput and dragging then update(input) end end)
 
 -- Initial Load
@@ -493,10 +526,7 @@ switchTab(HomePage)
 if readfile and pcall(function() readfile("Sairo_Last.txt") end) then
     local saved = readfile("Sairo_Last.txt")
     KeyBox.Text = saved
-    -- Auto verify attempt
-    task.delay(0.5, function()
-        verify(saved)
-    end)
+    task.delay(0.5, function() verify(saved) end)
 end
 
 return KeySystem
